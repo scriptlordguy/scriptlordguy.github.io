@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Profile — Boblox</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="center">
+    <h1>Profile</h1>
+    <div id="info"></div>
+    <div style="margin-top:12px"><button id="theme">Toggle Theme</button></div>
+    <div style="margin-top:12px"><canvas id="avatar3d" width="300" height="200" style="background:#222;border-radius:8px"></canvas></div>
+  </main>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
+  <script>
+    async function get(url){ return fetch(url,{headers:{'Authorization':'Bearer '+localStorage.getItem('token')}}).then(r=>r.json()); }
+    async function load(){ const me=await get('/api/me'); if(me.error){ location.href='/auth.html'; return; } document.getElementById('info').innerText=JSON.stringify(me);
+      // simple 3D box avatar
+      const canvas=document.getElementById('avatar3d'); const renderer=new THREE.WebGLRenderer({canvas}); const scene=new THREE.Scene(); const camera=new THREE.PerspectiveCamera(70,canvas.width/canvas.height,0.01,10); camera.position.z=2; const geo=new THREE.BoxGeometry(1,1,1); const mat=new THREE.MeshStandardMaterial({color:0x7dd3fc}); const mesh=new THREE.Mesh(geo,mat); scene.add(mesh); const light=new THREE.DirectionalLight(0xffffff,1); light.position.set(5,5,5); scene.add(light);
+      function animate(){ requestAnimationFrame(animate); mesh.rotation.x+=0.01; mesh.rotation.y+=0.01; renderer.setSize(canvas.width,canvas.height); renderer.render(scene,camera);} animate();
+    }
+    document.getElementById('theme').onclick=()=>{ const cur=localStorage.getItem('theme')||'dark'; const next=cur==='dark'?'light':'dark'; localStorage.setItem('theme',next); alert('Theme set to '+next); }
+    load();
+  </script>
+</body>
+</html>

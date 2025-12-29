@@ -1,0 +1,52 @@
+{
+  "users": [
+    {
+      "id": "Pz9PugQ10jvFHhGrdQECw",
+      "username": "tester1",
+      "email": "tester1@example.com",
+      "password": "$2b$10$X5PWSmHWDZ6BSQiHs38j4./y9bstedZFLp7rYwhKs7wSP.7PrIHZu",
+      "phone": "+10000000001",
+      "preferences": {
+        "theme": "dark"
+      },
+      "avatar": null,
+      "role": "user",
+      "created_at": "2025-12-29T03:01:07.809Z"
+    },
+    {
+      "id": "toEjMEZWSViJip63Wbw9k",
+      "username": "tester2",
+      "email": "tester2@example.com",
+      "password": "$2b$10$dUtnVJVHSg90HMu9ulQu7.hJLTIIIicPaYml5EnL9vWmZqULy5XpG",
+      "phone": "+10000000002",
+      "preferences": {
+        "theme": "dark"
+      },
+      "avatar": null,
+      "role": "user",
+      "created_at": "2025-12-29T03:01:27.017Z"
+    }
+  ],
+  "friends": [
+    {
+      "id": "j33E7QUM40DQmTGYdcYbj",
+      "requester": "Pz9PugQ10jvFHhGrdQECw",
+      "requestee": "toEjMEZWSViJip63Wbw9k",
+      "status": "pending",
+      "created_at": "2025-12-29T03:03:57.478Z"
+    }
+  ],
+  "messages": [],
+  "servers": [
+    {
+      "id": "uxHF8UIeNEk3qggYtZC3E",
+      "owner": "Pz9PugQ10jvFHhGrdQECw",
+      "name": "My Test Server",
+      "meta": {},
+      "created_at": "2025-12-29T03:03:42.751Z"
+    }
+  ],
+  "channels": [],
+  "server_members": [],
+  "bots": []
+}

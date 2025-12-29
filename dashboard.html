@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard — Boblox</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="center">
+    <h1 id="title">Dashboard</h1>
+    <div id="nav">
+      <button onclick="location.href='/servers.html'">Servers</button>
+      <button onclick="location.href='/chat.html'">Chat</button>
+      <button onclick="location.href='/games.html'">Games</button>
+      <button id="logout">Logout</button>
+    </div>
+    <div id="profile"></div>
+  </main>
+  <script>
+    async function get(url){ return fetch(url,{headers:{'Authorization':'Bearer '+localStorage.getItem('token')}}).then(r=>r.json()); }
+    async function load(){ const me=await get('/api/me'); if(me.error){ alert('Please login'); location.href='/auth.html'; return; } document.getElementById('profile').innerText=JSON.stringify(me); }
+    document.getElementById('logout').onclick=()=>{ localStorage.removeItem('token'); location.href='/auth.html'; };
+    load();
+  </script>
+</body>
+</html>

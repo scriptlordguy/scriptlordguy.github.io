@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Chat — Boblox</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="center">
+    <h1>Chat</h1>
+    <div>
+      <input id="other" placeholder="Friend ID"><button id="joinDM">Open DM</button>
+    </div>
+    <div id="messages" style="text-align:left;max-height:300px;overflow:auto;background:rgba(0,0,0,0.12);padding:12px;border-radius:8px;margin-top:12px"></div>
+    <div style="margin-top:12px">
+      <input id="msg" placeholder="Message"><button id="send">Send</button>
+      <input type="file" id="file">
+    </div>
+  </main>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const token = localStorage.getItem('token'); if(!token) location.href='/auth.html';
+    const socket = io({auth:{token}});
+    let currentConv=null;
+    document.getElementById('joinDM').onclick=()=>{
+      const other=document.getElementById('other').value;
+      const conv=[token && 'u', other].sort().join(':'); // placeholder conv id
+      currentConv = 'dm:'+([socket.io? '': '']).concat([].join(':'));
+      // we'll use simple conv id for local demo
+      const convKey=[socket.id,other].sort().join(':');
+      currentConv = 'dm:'+convKey;
+      socket.emit('join_dm', other);
+      document.getElementById('messages').innerHTML='';
+    }
+    socket.on('message',m=>{ const el=document.createElement('div'); el.innerText = `[${m.created_at}] ${m.sender}: ${m.content}`; document.getElementById('messages').appendChild(el); });
+    document.getElementById('send').onclick=()=>{
+      const txt=document.getElementById('msg').value;
+      if(!currentConv){ alert('open a DM first'); return; }
+      socket.emit('send_message',{conversation:currentConv,content:txt,type:'text'});
+      document.getElementById('msg').value='';
+    }
+    document.getElementById('file').onchange=async (e)=>{
+      const f=e.target.files[0]; if(!f) return;
+      const fd=new FormData(); fd.append('file',f);
+      const res=await fetch('/api/upload',{method:'POST',headers:{'Authorization':'Bearer '+token},body:fd});
+      const j=await res.json();
+      socket.emit('send_message',{conversation:currentConv,content:j.url,type:'image'});
+    }
+  </script>
+</body>
+</html>

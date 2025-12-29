@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Sign up / Login — Boblox</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="center">
+    <h1>Boblox</h1>
+    <div id="forms">
+      <section id="signup">
+        <h2>Sign up</h2>
+        <input id="su_username" placeholder="Username"><br>
+        <input id="su_email" placeholder="Email"><br>
+        <input id="su_phone" placeholder="Phone"><br>
+        <input id="su_pass" type="password" placeholder="Password"><br>
+        <button id="signupBtn">Sign up</button>
+      </section>
+      <hr>
+      <section id="login">
+        <h2>Login</h2>
+        <input id="li_email" placeholder="Email"><br>
+        <input id="li_pass" type="password" placeholder="Password"><br>
+        <button id="loginBtn">Login</button>
+      </section>
+    </div>
+  </main>
+  <script>
+    async function post(url,body){ return fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(r=>r.json()); }
+    document.getElementById('signupBtn').onclick=async ()=>{
+      const username=document.getElementById('su_username').value;
+      const email=document.getElementById('su_email').value;
+      const phone=document.getElementById('su_phone').value;
+      const pass=document.getElementById('su_pass').value;
+      const res=await post('/api/signup',{username,email,password:pass,phone});
+      if(res.token){ localStorage.setItem('token',res.token); location.href='/dashboard.html'; } else alert(res.error||'error');
+    }
+    document.getElementById('loginBtn').onclick=async ()=>{
+      const email=document.getElementById('li_email').value;
+      const pass=document.getElementById('li_pass').value;
+      const res=await post('/api/login',{email,password:pass});
+      if(res.token){ localStorage.setItem('token',res.token); location.href='/dashboard.html'; } else alert(res.error||'error');
+    }
+  </script>
+</body>
+</html>

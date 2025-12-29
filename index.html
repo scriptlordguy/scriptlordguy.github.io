@@ -16,33 +16,92 @@
       <p class="muted" id="status">Checking server availability...</p>
       <div id="actions" style="display:none; margin-top:12px">
         <a class="cta" id="play" href="/auth.html">Play (open app)</a>
-        <a class="cta" href="/dashboard.html" style="background:#10b981;margin-left:8px">Dashboard</a>
+        <a class="cta" id="dashboardLink" href="/dashboard.html" style="background:#10b981;margin-left:8px">Dashboard</a>
         <a class="cta" href="/README.md" style="background:#6b7280;margin-left:8px">Run Locally</a>
       </div>
     </main>
     <script>
-      // Try to detect if the backend is live at this origin; if so, redirect to the app dashboard
+      // Try to detect if the backend is live at this origin or at a known public tunnel; set Play/Dashboard targets accordingly
       const statusEl = document.getElementById('status');
       const actions = document.getElementById('actions');
+      const playBtn = document.getElementById('play');
+      const dashboardLink = document.getElementById('dashboardLink');
 
-      const tryHealth = async () => {
+      // Add any known public tunnels or hosted backends here as fallbacks
+      const fallbackHosts = [
+        'https://quick-maps-write.loca.lt'
+      ];
+
+      async function tryHost(base) {
         try {
           const controller = new AbortController();
           const id = setTimeout(()=>controller.abort(), 2000);
-          const r = await fetch('/health',{signal:controller.signal});
+          const r = await fetch(new URL('/health', base).toString(), { signal: controller.signal });
           clearTimeout(id);
-          if(r.ok) {
-            statusEl.textContent = 'Server available — redirecting to Dashboard...';
-            window.location.href = '/dashboard.html';
+          return r && r.ok;
+        } catch (e) {
+          return false;
+        }
+      }
+
+      (async function detect() {
+        // First try same-origin
+        const originOk = await tryHost(window.location.origin);
+        if (originOk) {
+          statusEl.textContent = 'Server available — redirecting to Dashboard...';
+          window.location.href = new URL('/dashboard.html', window.location.origin).toString();
+          return;
+        }
+
+        // Try known fallbacks
+        for (const h of fallbackHosts) {
+          const ok = await tryHost(h);
+          if (ok) {
+            statusEl.textContent = 'Server available at ' + h + ' — redirecting...';
+            window.location.href = new URL('/dashboard.html', h).toString();
             return;
           }
-        } catch(e) {
-          // not available
         }
-        statusEl.textContent = 'Server not available from GitHub Pages. Use the Play button to open the static app UI (may require a hosted backend).';
+
+        // Not found: show actions and wire Play to try fallback host if clicked
+        statusEl.textContent = 'Server not available at this site. Use the Play button to open the public app (fallback).';
         actions.style.display = 'block';
-      };
-      tryHealth();
+
+        // If the user clicks Play, try to open a working host in a new tab
+        playBtn.addEventListener('click', async (ev) => {
+          ev.preventDefault();
+          // try same-origin first
+          if (await tryHost(window.location.origin)) {
+            window.location.href = new URL('/auth.html', window.location.origin).toString();
+            return;
+          }
+          // then try fallbacks
+          for (const h of fallbackHosts) {
+            if (await tryHost(h)) {
+              window.open(new URL('/auth.html', h).toString(), '_blank');
+              return;
+            }
+          }
+          // final fallback: open the static auth page on this origin
+          window.location.href = '/auth.html';
+        });
+
+        // Dashboard link should try to open an active backend if available
+        dashboardLink.addEventListener('click', async (ev) => {
+          ev.preventDefault();
+          if (await tryHost(window.location.origin)) {
+            window.location.href = new URL('/dashboard.html', window.location.origin).toString();
+            return;
+          }
+          for (const h of fallbackHosts) {
+            if (await tryHost(h)) {
+              window.open(new URL('/dashboard.html', h).toString(), '_blank');
+              return;
+            }
+          }
+          window.location.href = '/dashboard.html';
+        });
+      })();
     </script>
   </body>
 </html>

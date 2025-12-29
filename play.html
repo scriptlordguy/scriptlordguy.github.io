@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Play — Boblox</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="center">
+    <h1>Play — Boblox (Public)</h1>
+    <p class="muted">Play public demo games without signing in. For full online play, sign in when a backend is available.</p>
+
+    <div style="max-width:720px;width:100%;text-align:left;margin-top:12px">
+      <label>Display name (optional): <input id="guestName" placeholder="Guest123" style="width:100%"></label>
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <button id="saveName" class="cta">Save name</button>
+        <a class="cta" href="/games.html" id="playDemo">Play demo games</a>
+      </div>
+
+      <div id="gamesList" style="margin-top:18px"></div>
+    </div>
+  </main>
+  <script>
+    const GAMES_FALLBACK = [
+      {id:'demo-chat',name:'Chat Playground',desc:'A simple chat demo (local)'} ,
+      {id:'demo-game',name:'Bouncy Blocks',desc:'A tiny demo game built with canvas'}
+    ];
+
+    function renderList(games){
+      const el = document.getElementById('gamesList');
+      el.innerHTML = '<h3>Available demo games</h3>' + games.map(g=>`<div style="padding:10px;border-radius:8px;background:rgba(0,0,0,0.04);margin-top:8px"><strong>${g.name}</strong><p class="muted">${g.desc}</p><div><a class="cta" href="/games.html">Play</a></div></div>`).join('');
+    }
+
+    async function tryFetchLive(){
+      try{
+        const r = await fetch('/api/games');
+        if(r.ok){ const j = await r.json(); if(j.games) return j.games; }
+      }catch(e){}
+      return null;
+    }
+
+    (async ()=>{
+      // prefills
+      const name = localStorage.getItem('guest_name') || '';
+      document.getElementById('guestName').value = name;
+      document.getElementById('saveName').onclick = ()=>{ localStorage.setItem('guest_name',document.getElementById('guestName').value || 'Guest'+Math.floor(Math.random()*999)); alert('Saved'); };
+
+      const live = await tryFetchLive();
+      if(live && live.length){ renderList(live.map(g=>({id:g.id,name:g.name,desc:g.meta?.description||''}))); }
+      else renderList(GAMES_FALLBACK);
+    })();
+  </script>
+</body>
+</html>

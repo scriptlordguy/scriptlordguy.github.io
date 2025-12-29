@@ -1,0 +1,8 @@
+node_modules/
+uploads/
+server_*.log
+node_server.log
+server_py.log
+data/db.json
+.DS_Store
+.env

@@ -12,96 +12,75 @@
     <main class="center">
       <img src="/assets/favicon.svg" alt="logo" class="logo" />
       <h1>Boblox</h1>
-      <p class="tag">Play now — launching app...</p>
-      <p class="muted" id="status">Checking server availability...</p>
-      <div id="actions" style="display:none; margin-top:12px">
-        <a class="cta" id="play" href="/auth.html">Play (open app)</a>
-        <a class="cta" id="dashboardLink" href="/dashboard.html" style="background:#10b981;margin-left:8px">Dashboard</a>
-        <a class="cta" href="/README.md" style="background:#6b7280;margin-left:8px">Run Locally</a>
+      <p class="tag">Play now — sign in or create an account</p>
+
+      <div id="forms" style="max-width:420px;width:100%">
+        <div style="display:flex;gap:12px">
+          <button id="showLogin" class="cta" style="background:#0b84ff">Login</button>
+          <button id="showSignup" class="cta" style="background:#10b981">Sign up</button>
+        </div>
+
+        <div id="loginForm" style="display:none;margin-top:12px">
+          <input id="li_email" placeholder="Email" style="width:100%"><br>
+          <input id="li_pass" type="password" placeholder="Password" style="width:100%;margin-top:8px"><br>
+          <button id="loginBtn" class="cta" style="margin-top:10px">Login</button>
+        </div>
+
+        <div id="signupForm" style="display:none;margin-top:12px">
+          <input id="su_username" placeholder="Username" style="width:100%"><br>
+          <input id="su_email" placeholder="Email" style="width:100%;margin-top:8px"><br>
+          <input id="su_phone" placeholder="Phone" style="width:100%;margin-top:8px"><br>
+          <input id="su_pass" type="password" placeholder="Password" style="width:100%;margin-top:8px"><br>
+          <button id="signupBtn" class="cta" style="margin-top:10px">Create account</button>
+        </div>
+
+        <p class="muted" id="status">Detecting backend...</p>
       </div>
     </main>
+
     <script>
-      // Try to detect if the backend is live at this origin or at a known public tunnel; set Play/Dashboard targets accordingly
-      const statusEl = document.getElementById('status');
-      const actions = document.getElementById('actions');
-      const playBtn = document.getElementById('play');
-      const dashboardLink = document.getElementById('dashboardLink');
+      // Detect API base (same-origin /health or fallbacks) and wire auth forms
+      const fallbackHosts = ['https://quick-maps-write.loca.lt'];
+      let API_BASE = window.location.origin; // default
 
-      // Add any known public tunnels or hosted backends here as fallbacks
-      const fallbackHosts = [
-        'https://quick-maps-write.loca.lt'
-      ];
-
-      async function tryHost(base) {
-        try {
-          const controller = new AbortController();
-          const id = setTimeout(()=>controller.abort(), 2000);
-          const r = await fetch(new URL('/health', base).toString(), { signal: controller.signal });
-          clearTimeout(id);
+      async function checkHost(base){
+        try{
+          const ctrl=new AbortController(); const id=setTimeout(()=>ctrl.abort(),2000);
+          const r=await fetch(new URL('/health',base).toString(),{signal:ctrl.signal}); clearTimeout(id);
           return r && r.ok;
-        } catch (e) {
-          return false;
-        }
+        }catch(e){return false}
       }
 
-      (async function detect() {
-        // First try same-origin
-        const originOk = await tryHost(window.location.origin);
-        if (originOk) {
-          statusEl.textContent = 'Server available — redirecting to Dashboard...';
-          window.location.href = new URL('/dashboard.html', window.location.origin).toString();
-          return;
+      (async ()=>{
+        const statusEl=document.getElementById('status');
+        if(await checkHost(window.location.origin)){
+          statusEl.textContent='Backend available (same origin).'; API_BASE=window.location.origin; return;
         }
-
-        // Try known fallbacks
-        for (const h of fallbackHosts) {
-          const ok = await tryHost(h);
-          if (ok) {
-            statusEl.textContent = 'Server available at ' + h + ' — redirecting...';
-            window.location.href = new URL('/dashboard.html', h).toString();
-            return;
-          }
-        }
-
-        // Not found: show actions and wire Play to try fallback host if clicked
-        statusEl.textContent = 'Server not available at this site. Use the Play button to open the public app (fallback).';
-        actions.style.display = 'block';
-
-        // If the user clicks Play, try to open a working host in a new tab
-        playBtn.addEventListener('click', async (ev) => {
-          ev.preventDefault();
-          // try same-origin first
-          if (await tryHost(window.location.origin)) {
-            window.location.href = new URL('/auth.html', window.location.origin).toString();
-            return;
-          }
-          // then try fallbacks
-          for (const h of fallbackHosts) {
-            if (await tryHost(h)) {
-              window.open(new URL('/auth.html', h).toString(), '_blank');
-              return;
-            }
-          }
-          // final fallback: open the static auth page on this origin
-          window.location.href = '/auth.html';
-        });
-
-        // Dashboard link should try to open an active backend if available
-        dashboardLink.addEventListener('click', async (ev) => {
-          ev.preventDefault();
-          if (await tryHost(window.location.origin)) {
-            window.location.href = new URL('/dashboard.html', window.location.origin).toString();
-            return;
-          }
-          for (const h of fallbackHosts) {
-            if (await tryHost(h)) {
-              window.open(new URL('/dashboard.html', h).toString(), '_blank');
-              return;
-            }
-          }
-          window.location.href = '/dashboard.html';
-        });
+        for(const h of fallbackHosts){ if(await checkHost(h)){ statusEl.textContent='Backend available at ' + h; API_BASE=h; return; } }
+        statusEl.textContent='No backend detected — the site will still allow account creation if you host the backend or use the Play button.';
       })();
+
+      function jsonPost(url,body){ return fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(r=>r.json()); }
+
+      document.getElementById('showLogin').onclick=()=>{ document.getElementById('loginForm').style.display='block'; document.getElementById('signupForm').style.display='none'; };
+      document.getElementById('showSignup').onclick=()=>{ document.getElementById('signupForm').style.display='block'; document.getElementById('loginForm').style.display='none'; };
+
+      document.getElementById('signupBtn').onclick=async ()=>{
+        const username=document.getElementById('su_username').value; const email=document.getElementById('su_email').value; const phone=document.getElementById('su_phone').value; const pass=document.getElementById('su_pass').value;
+        const res = await jsonPost(API_BASE + '/api/signup',{username,email,password:pass,phone});
+        if(res.token){ localStorage.setItem('token',res.token); window.location.href = (API_BASE===window.location.origin?'/dashboard.html':API_BASE + '/dashboard.html'); }
+        else alert(res.error||'Signup failed');
+      };
+
+      document.getElementById('loginBtn').onclick=async ()=>{
+        const email=document.getElementById('li_email').value; const pass=document.getElementById('li_pass').value;
+        const res = await jsonPost(API_BASE + '/api/login',{email,password:pass});
+        if(res.token){ localStorage.setItem('token',res.token); window.location.href = (API_BASE===window.location.origin?'/dashboard.html':API_BASE + '/dashboard.html'); }
+        else alert(res.error||'Login failed');
+      };
+
+      // Show login by default
+      document.getElementById('showLogin').click();
     </script>
   </body>
 </html>

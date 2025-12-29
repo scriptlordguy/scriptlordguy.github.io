@@ -19,8 +19,21 @@
     <div id="onboard" style="margin-top:18px"></div>
   </main>
   <script>
-    async function get(url){ return fetch(url,{headers:{'Authorization':'Bearer '+localStorage.getItem('token')}}).then(r=>r.json()); }
-    async function load(){ const me=await get('/api/me'); if(me.error){ alert('Please login'); location.href='/auth.html'; return; }
+    // API base detection (same origin or fallbacks)
+    const FALLBACKS = ['https://quick-maps-write.loca.lt'];
+    let API_BASE = window.location.origin;
+    async function detectBase(){
+      const tryHost = async (base)=>{
+        try{ const ctrl=new AbortController(); const id=setTimeout(()=>ctrl.abort(),2000);
+          const r = await fetch(new URL('/health',base).toString(),{signal:ctrl.signal}); clearTimeout(id); return r && r.ok; }catch(e){return false}
+      };
+      if(await tryHost(window.location.origin)){ API_BASE = window.location.origin; return; }
+      for(const f of FALLBACKS){ if(await tryHost(f)){ API_BASE = f; return; } }
+      API_BASE = window.location.origin; // fallback
+    }
+
+    async function get(url){ return fetch((API_BASE===window.location.origin?url:API_BASE+url),{headers:{'Authorization':'Bearer '+localStorage.getItem('token')}}).then(r=>r.json()); }
+    async function load(){ await detectBase(); const me=await get('/api/me'); if(me.error){ alert('Please login'); location.href='/auth.html'; return; }
       document.getElementById('profile').innerText=JSON.stringify(me);
       // fetch servers and games to decide whether to show onboarding
       const sv = await get('/api/servers'); const gv = await get('/api/games');

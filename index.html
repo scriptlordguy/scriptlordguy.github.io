@@ -39,8 +39,8 @@
     </main>
 
     <script>
-      // Detect API base (same-origin /health or fallbacks) and wire auth forms
-      const fallbackHosts = ['https://quick-maps-write.loca.lt'];
+      // Detect API base (same-origin only); no public tunnel fallback configured
+      const fallbackHosts = [];
       let API_BASE = window.location.origin; // default
 
       async function checkHost(base){

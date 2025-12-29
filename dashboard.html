@@ -19,8 +19,8 @@
     <div id="onboard" style="margin-top:18px"></div>
   </main>
   <script>
-    // API base detection (same origin or fallbacks)
-    const FALLBACKS = ['https://quick-maps-write.loca.lt'];
+    // API base detection (same origin only)
+    const FALLBACKS = [];
     let API_BASE = window.location.origin;
     async function detectBase(){
       const tryHost = async (base)=>{
@@ -28,7 +28,6 @@
           const r = await fetch(new URL('/health',base).toString(),{signal:ctrl.signal}); clearTimeout(id); return r && r.ok; }catch(e){return false}
       };
       if(await tryHost(window.location.origin)){ API_BASE = window.location.origin; return; }
-      for(const f of FALLBACKS){ if(await tryHost(f)){ API_BASE = f; return; } }
       API_BASE = window.location.origin; // fallback
     }
 

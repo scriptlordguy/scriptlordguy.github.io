@@ -6,6 +6,8 @@ This repository hosts a placeholder website for **Boblox**. The site is currentl
 
 Once you're ready, you can replace the placeholder with the full Boblox site content.
 
+**Note:** This commit triggers the GitHub Pages deployment workflow to publish the placeholder site.
+
 ---
 
 ## Local preview

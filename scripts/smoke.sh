@@ -74,11 +74,17 @@ echo "Get /api/me:"; echo "$ME" | jq '.'
 CREATE=$(curl -s -X POST $BASE/api/servers -H "Authorization: Bearer $TOK1" -H "Content-Type: application/json" -d '{"name":"smoke-server"}')
 echo "Create server:"; echo "$CREATE" | jq '.'
 
+# check onboarding defaults (servers & games auto-created for each signup)
+S1=$(curl -s -X GET $BASE/api/servers -H "Authorization: Bearer $TOK1" | jq '.')
+G1=$(curl -s -X GET $BASE/api/games -H "Authorization: Bearer $TOK1" | jq '.')
+echo "Servers for user1:"; echo "$S1"
+echo "Games for user1:"; echo "$G1"
+
 F2ID=$(echo "$R2" | jq -r '.user.id')
 FR=$(curl -s -X POST $BASE/api/friends/request -H "Authorization: Bearer $TOK1" -H "Content-Type: application/json" -d '{"userId":"'$F2ID'"}')
 echo "Friend request:"; echo "$FR" | jq '.'
 
-UP=$(curl -s -X POST -H "Authorization: Bearer $TOK1" -F "file=@../assets/favicon.svg" $BASE/api/upload)
+UP=$(curl -s -X POST -H "Authorization: Bearer $TOK1" -F "file=@assets/favicon.svg" $BASE/api/upload)
 echo "Upload:"; echo "$UP" | jq '.'
 
 echo "SMOKE OK"

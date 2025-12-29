@@ -16,10 +16,28 @@
       <button id="logout">Logout</button>
     </div>
     <div id="profile"></div>
+    <div id="onboard" style="margin-top:18px"></div>
   </main>
   <script>
     async function get(url){ return fetch(url,{headers:{'Authorization':'Bearer '+localStorage.getItem('token')}}).then(r=>r.json()); }
-    async function load(){ const me=await get('/api/me'); if(me.error){ alert('Please login'); location.href='/auth.html'; return; } document.getElementById('profile').innerText=JSON.stringify(me); }
+    async function load(){ const me=await get('/api/me'); if(me.error){ alert('Please login'); location.href='/auth.html'; return; }
+      document.getElementById('profile').innerText=JSON.stringify(me);
+      // fetch servers and games to decide whether to show onboarding
+      const sv = await get('/api/servers'); const gv = await get('/api/games');
+      const ob = document.getElementById('onboard');
+      if((sv.servers && sv.servers.length===0) || (gv.games && gv.games.length===0)){
+        ob.innerHTML = `<div style="padding:12px;background:rgba(0,0,0,0.12);border-radius:8px;text-align:left">
+          <h3>Complete your setup</h3>
+          <p>Create a server, or a game to get started quickly.</p>
+          <p><a href="/onboarding.html" class="cta">Open onboarding</a></p>
+        </div>`;
+      } else {
+        ob.innerHTML = `<div style="padding:12px;background:rgba(0,0,0,0.06);border-radius:8px;text-align:left">
+          <h3>Your quick links</h3>
+          <p><a href="/servers.html">Servers</a> · <a href="/chat.html">Chat</a> · <a href="/games.html">Games</a></p>
+        </div>`;
+      }
+    }
     document.getElementById('logout').onclick=()=>{ localStorage.removeItem('token'); location.href='/auth.html'; };
     load();
   </script>

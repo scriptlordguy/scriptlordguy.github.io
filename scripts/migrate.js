@@ -13,7 +13,8 @@ if(!fs.existsSync(dbPath)){
     servers: [],
     channels: [],
     server_members: [],
-    bots: []
+    bots: [],
+    games: []
   };
   fs.writeFileSync(dbPath, JSON.stringify(init,null,2));
   console.log('Created data/db.json');

@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Onboarding — Boblox</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="center">
+    <h1>Welcome to Boblox</h1>
+    <p>Let's finish setting up your account. You can manage Servers, Chat, and Games from here.</p>
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:16px">
+      <button id="createServer">Create a Server</button>
+      <button id="createGame">Create a Game</button>
+      <a href="/dashboard.html" class="cta">Go to Dashboard</a>
+    </div>
+  </main>
+  <script>
+    async function post(url, body){ return fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('token')},body:JSON.stringify(body)}).then(r=>r.json()); }
+    document.getElementById('createServer').onclick=async ()=>{
+      const name = prompt('Server name','My Server'); if(!name) return;
+      const res = await post('/api/servers',{name}); alert(res.error?res.error:'Created: '+res.name);
+    }
+    document.getElementById('createGame').onclick=async ()=>{
+      const name = prompt('Game name','My Game'); if(!name) return;
+      const res = await post('/api/games',{name}); alert(res.error?res.error:'Created: '+res.name);
+    }
+  </script>
+</body>
+</html>

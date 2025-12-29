@@ -1,6 +1,0 @@
-Serving at http://localhost:8000 (Python 3 http.server)
-127.0.0.1 - - [29/Dec/2025 02:30:43] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [29/Dec/2025 02:30:43] "GET /styles.css HTTP/1.1" 200 -
-127.0.0.1 - - [29/Dec/2025 02:30:43] "GET /assets/favicon.svg HTTP/1.1" 200 -
-127.0.0.1 - - [29/Dec/2025 02:30:43] "GET /assets/favicon.svg HTTP/1.1" 304 -
-127.0.0.1 - - [29/Dec/2025 02:31:00] "HEAD / HTTP/1.1" 200 -

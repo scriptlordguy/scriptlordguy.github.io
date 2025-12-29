@@ -12,9 +12,37 @@
     <main class="center">
       <img src="/assets/favicon.svg" alt="logo" class="logo" />
       <h1>Boblox</h1>
-      <p class="tag">Coming soon — site under construction.</p>
-      <p class="muted">This repository will host the full Boblox site later. For now, a minimal placeholder.</p>
-      <a class="cta" href="https://github.com/scriptlordguy/scriptlordguy.github.io">Repository</a>
+      <p class="tag">Play now — launching app...</p>
+      <p class="muted" id="status">Checking server availability...</p>
+      <div id="actions" style="display:none; margin-top:12px">
+        <a class="cta" id="play" href="/auth.html">Play (open app)</a>
+        <a class="cta" href="/dashboard.html" style="background:#10b981;margin-left:8px">Dashboard</a>
+        <a class="cta" href="/README.md" style="background:#6b7280;margin-left:8px">Run Locally</a>
+      </div>
     </main>
+    <script>
+      // Try to detect if the backend is live at this origin; if so, redirect to the app dashboard
+      const statusEl = document.getElementById('status');
+      const actions = document.getElementById('actions');
+
+      const tryHealth = async () => {
+        try {
+          const controller = new AbortController();
+          const id = setTimeout(()=>controller.abort(), 2000);
+          const r = await fetch('/health',{signal:controller.signal});
+          clearTimeout(id);
+          if(r.ok) {
+            statusEl.textContent = 'Server available — redirecting to Dashboard...';
+            window.location.href = '/dashboard.html';
+            return;
+          }
+        } catch(e) {
+          // not available
+        }
+        statusEl.textContent = 'Server not available from GitHub Pages. Use the Play button to open the static app UI (may require a hosted backend).';
+        actions.style.display = 'block';
+      };
+      tryHealth();
+    </script>
   </body>
 </html>
